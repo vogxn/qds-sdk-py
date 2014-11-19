@@ -339,6 +339,9 @@ class HadoopCommand(Command):
     optparser.add_option("--name", dest="name",
                          help="Assign a name to this command")
 
+    optparser.add_option("--macros", dest="macros",
+                         help="expressions to expand macros used in query")
+
     optparser.disable_interspersed_args()
 
     @classmethod
@@ -380,7 +383,9 @@ class HadoopCommand(Command):
 
         parsed["sub_command"] = subcmd
         parsed["sub_command_args"] = " ".join("'" + a + "'" for a in args)
-
+        if options.macros is not None:
+            options.macros = json.loads(options.macros)
+        parsed["macros"] = options.macros
         return parsed
 
 
@@ -398,6 +403,9 @@ class ShellCommand(Command):
 
     optparser.add_option("-a", "--archives", dest="archives",
                          help="List of archives [optional] Format : archive1,archive2 (archives in s3 bucket) These are unarchived in the working directory where the command is executed")
+
+    optparser.add_option("--macros", dest="macros",
+                         help="expressions to expand macros used in query")
 
     optparser.add_option("--cluster-label", dest="label",
                          help="the label of the cluster to run the command on")
@@ -471,6 +479,8 @@ class ShellCommand(Command):
                     "Extra arguments can only be supplied with a script_location",
                     cls.optparser.format_help())
 
+        if options.macros is not None:
+            options.macros = json.loads(options.macros)
         v = vars(options)
         v["command_type"] = "ShellCommand"
         return v
@@ -485,6 +495,9 @@ class PigCommand(Command):
 
     optparser.add_option("-f", "--script_location", dest="script_location",
                          help="Path where bash script to run is stored. Can be S3 URI or local file path")
+
+    optparser.add_option("--macros", dest="macros",
+                         help="expressions to expand macros used in query")
 
     optparser.add_option("--cluster-label", dest="label",
                          help="the label of the cluster to run the command on")
@@ -563,6 +576,8 @@ class PigCommand(Command):
                     "Extra arguments can only be supplied with a script_location",
                     cls.optparser.format_help())
 
+        if options.macros is not None:
+            options.macros = json.loads(options.macros)
         v = vars(options)
         v["command_type"] = "PigCommand"
         return v
